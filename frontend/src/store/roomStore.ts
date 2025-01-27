@@ -9,19 +9,17 @@ export const BookingRoom = defineStore('RoomStore',
 
         const rooms = ref([])
         const error = ref(null);
-        type Time = {
-            hours: number;
-            minutes: number;
-        };
+        // const startTime = ref('')
+        // const endTime = ref('')
 
-        const fetchRooms = async (date: Date, time: Time) => {
+        const fetchRooms = async (date: Date, startTime: string, endTime: string) => {
             // console.log("fetchRooms called with:", date, time);
 
             let url = 'http://localhost:3000/api/booked';
 
             try {
                 await axios.get(url,
-                    {params: {date, time}})
+                    {params: {date, startTime, endTime}})
                     .then(function (salleResponse) {
                         const allRooms = salleResponse.data.availableRooms; // Liste de toutes les salles
                         console.log(allRooms)
@@ -40,12 +38,12 @@ export const BookingRoom = defineStore('RoomStore',
             }
         }
 
-        const reserveRoom = async (id: number, date: Date, time: Time) => {
+        const reserveRoom = async (id: number, date: Date, startTime: string, endTime: string) => {
             // console.log("reserved:", date, time, id);
 
             let url = 'http://localhost:3000/api/reservations';
             try {
-                await axios.post(url, {id,  date, time})
+                await axios.post(url, {id, date, startTime, endTime})
                     .then(function (response) {
                         console.log("API Reservation:", response.data);
                         rooms.value = response.data

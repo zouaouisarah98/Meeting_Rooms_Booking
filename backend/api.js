@@ -41,19 +41,32 @@ app.get('/api/salles', (req, res) => {
 
 });
 
+const isOverlapping = (start1, end1, start2, end2) => {
+  const [startHour1, startMinute1] = start1.split(':').map(Number);
+  const [endHour1, endMinute1] = end1.split(':').map(Number);
+  const [startHour2, startMinute2] = start2.split(':').map(Number);
+  const [endHour2, endMinute2] = end2.split(':').map(Number);
+
+  const start1Minutes = startHour1 * 60 + startMinute1;
+  const end1Minutes = endHour1 * 60 + endMinute1;
+  const start2Minutes = startHour2 * 60 + startMinute2;
+  const end2Minutes = endHour2 * 60 + endMinute2;
+
+  return start1Minutes < end2Minutes && start2Minutes < end1Minutes;
+};
 
 app.get('/api/booked', (req, res) => {
-    const {date, time} = req.query;
+    const {date, startTime, endTime} = req.query;
     // console.log('Request received:', {date, time});
     const data = rooms.rooms
 
-    if (!date || !time) {
+    if (!date || !startTime || !endTime) {
         return res.status(400).json({error: 'Date and time are required'});
     }
 
     const unavailableRooms = reservations
-        .filter((r) => r.date === date && r.time === time)
-        .map((r) => r.roomId); // Ici, tu peux prendre l'ID virtuel dans booked.json
+        .filter((r) => r.date === date && isOverlapping(r.startTime, r.endTime, startTime, endTime))
+        .map((r) => r.roomId);
 
     // Créer un index virtuel dans la liste des salles
     const availableRooms = data.map((room, index) => ({
@@ -61,24 +74,21 @@ app.get('/api/booked', (req, res) => {
         id: index + 1,  // Ajouter un identifiant virtuel
     })).filter((room) => !unavailableRooms.includes(room.id)); // Vérifier la disponibilité
 
-    // console.log('unavailableRooms:', unavailableRooms);
-    // console.log('availableRooms:', availableRooms);
-
     res.status(200).json({availableRooms});
 });
 
 
 // Reserve a room
 app.post('/api/reservations', (req, res) => {
-    const {id, date, time} = req.body;
-    // console.log('reservation for', id, date, time);
 
-    if (!id || !date || !time) {
+    const {id, date, startTime, endTime} = req.body;
+
+    if (!id || !date || !startTime || !endTime) {
         return res.status(400).json({error: 'Room ID, date, and time are required'});
     }
 
     const isRoomAvailable = !reservations.some(
-        (r) => r.roomId === id && r.date === date && r.time === time
+        (r) => r.roomId === id && r.date === date && isOverlapping(r.startTime, r.endTime, startTime, endTime)
     );
 
     if (!isRoomAvailable) {
@@ -86,7 +96,8 @@ app.post('/api/reservations', (req, res) => {
     }
 
     // Ajouter la réservation avec l'ID de la salle
-    reservations.push({roomId: id,  date, time});
+    reservations.push({roomId: id, date, startTime, endTime});
+
     saveJSON(bookedUrl, reservations);
     res.status(201).json({message: 'Reservation created successfully'});
 });

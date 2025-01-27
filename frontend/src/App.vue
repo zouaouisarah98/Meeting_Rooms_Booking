@@ -2,13 +2,13 @@
   <NavBar/>
   <div class="container-fluid" style="margin-top: 2em">
     <div class="row">
-      <div class="col" style="margin-top: 4em">
+      <div class="col-lg-6" style="margin-top: 4em">
         <figure class="figure">
-          <img src="./assets/Mroom.jpg" class="figure-img img-fluid rounded" alt="MyImg">
+          <img src="./assets/Mroom.jpg" class="figure-img rounded" alt="MyImg">
         </figure>
 
       </div>
-      <div class="col">
+      <div class="col-lg-6">
         <MeetingRoomBooking/>
       </div>
 
