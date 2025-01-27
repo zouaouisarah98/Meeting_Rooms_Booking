@@ -77,14 +77,6 @@ const date = ref<string>(now.toISOString().split("T")[0]);
 const startTime = ref<string>('08:30');
 const endTime = ref<string>('09:30');
 
-// const timeRange = ref<[string, string]>([
-//   `${String(now.getHours()).padStart(2, "0")}:${String(
-//       now.getMinutes()
-//   ).padStart(2, "0")}`,
-//   `${String(now.getHours() + 1).padStart(2, "0")}:${String(
-//       now.getMinutes()
-//   ).padStart(2, "0")}`,
-// ]);
 
 const successMessage = ref('');
 const errorMessage = ref('');
@@ -125,7 +117,6 @@ const reserveRoom = async (id: number) => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 1em;
 }
 
 .form-group {

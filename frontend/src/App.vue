@@ -2,17 +2,18 @@
   <NavBar/>
   <div class="container-fluid" style="margin-top: 2em">
     <div class="row">
-      <div class="col-lg-6" style="margin-top: 4em">
+      <div class="col-8" style="margin-top:1em">
+        <MySchedulerPage/>
+      </div>
+      <div class="col-4">
         <figure class="figure">
           <img src="./assets/Mroom.jpg" class="figure-img rounded" alt="MyImg">
         </figure>
-
-      </div>
-      <div class="col-lg-6">
         <MeetingRoomBooking/>
       </div>
 
     </div>
+
   </div>
 </template>
 
@@ -20,6 +21,7 @@
 
 import MeetingRoomBooking from "./components/MeetingRoomBooking.vue";
 import NavBar from "./components/NavBar.vue";
+import MySchedulerPage from "./components/MySchedulerPage.vue";
 </script>
 
 

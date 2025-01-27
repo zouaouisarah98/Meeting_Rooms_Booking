@@ -1,59 +1,48 @@
-import {defineStore} from 'pinia'
-import axios from 'axios'
-import {ref} from 'vue'
+import {defineStore} from 'pinia';
+import axios from 'axios';
+import {ref} from 'vue';
 
+export const BookingRoom = defineStore('RoomStore', () => {
+    const rooms = ref([]);
+    const reservations = ref([]); // Ajouter un tableau pour stocker les réservations
+    const error = ref(null);
 
-export const BookingRoom = defineStore('RoomStore',
-    () => {
-
-
-        const rooms = ref([])
-        const error = ref(null);
-        // const startTime = ref('')
-        // const endTime = ref('')
-
-        const fetchRooms = async (date: Date, startTime: string, endTime: string) => {
-            // console.log("fetchRooms called with:", date, time);
-
-            let url = 'http://localhost:3000/api/booked';
-
-            try {
-                await axios.get(url,
-                    {params: {date, startTime, endTime}})
-                    .then(function (salleResponse) {
-                        const allRooms = salleResponse.data.availableRooms; // Liste de toutes les salles
-                        console.log(allRooms)
-
-                        // Créer un index virtuel en ajoutant un id temporaire
-                        const allRoomsWithId = allRooms.map((room, index) => ({
-                            ...room,
-                            id: index + 1 // Création d'un index virtuel basé sur l'ordre des éléments
-                        }));
-                        console.log("API Response:", allRoomsWithId);
-                        rooms.value = allRoomsWithId
-                    })
-            } catch (err) {
-                console.log("Error:", err);
-                error.value = err.response?.data?.error || 'Failed to fetch rooms';
-            }
+    const fetchRooms = async (date: string, startTime: string, endTime: string) => {
+        let url = 'http://localhost:3000/api/booked';
+        try {
+            const response = await axios.get(url, {
+                params: {date, startTime, endTime}
+            });
+            const allRooms = response.data.availableRooms;
+            rooms.value = allRooms;
+        } catch (err) {
+            error.value = err.response?.data?.error || 'Failed to fetch rooms';
         }
+    };
 
-        const reserveRoom = async (id: number, date: Date, startTime: string, endTime: string) => {
-            // console.log("reserved:", date, time, id);
+    const fetchReservations = async () => {
+        let url = 'http://localhost:3000/api/reservations';
+        try {
+            const response = await axios.get(url);
+            reservations.value = response.data;
+        } catch (err) {
+            console.error('Error fetching reservations:', err);
+        }
+    };
 
-            let url = 'http://localhost:3000/api/reservations';
-            try {
-                await axios.post(url, {id, date, startTime, endTime})
-                    .then(function (response) {
-                        console.log("API Reservation:", response.data);
-                        rooms.value = response.data
-                    })
-            } catch (err) {
-                throw new Error(err.response?.data?.error || 'Failed to reserve room');
-            }
-        };
-        return {rooms, fetchRooms, reserveRoom}  //findRoom
+    const reserveRoom = async (id: number, date: string, startTime: string, endTime: string) => {
+        let url = 'http://localhost:3000/api/reservations';
+        try {
 
+            const room = rooms.value.find(r => r.id === id);
+            const roomName = room ? room.name : 'Unknown Room';
+            await axios.post(url, {id, date, startTime, endTime,roomName});
+            fetchRooms(date, startTime, endTime); // Rafraîchir les salles disponibles
+            fetchReservations(); // Rafraîchir les réservations
+        } catch (err) {
+            throw new Error(err.response?.data?.error || 'Failed to reserve room');
+        }
+    };
 
-    }
-)
+    return {rooms, reservations, fetchRooms, fetchReservations, reserveRoom};
+});

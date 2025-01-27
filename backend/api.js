@@ -42,17 +42,17 @@ app.get('/api/salles', (req, res) => {
 });
 
 const isOverlapping = (start1, end1, start2, end2) => {
-  const [startHour1, startMinute1] = start1.split(':').map(Number);
-  const [endHour1, endMinute1] = end1.split(':').map(Number);
-  const [startHour2, startMinute2] = start2.split(':').map(Number);
-  const [endHour2, endMinute2] = end2.split(':').map(Number);
+    const [startHour1, startMinute1] = start1.split(':').map(Number);
+    const [endHour1, endMinute1] = end1.split(':').map(Number);
+    const [startHour2, startMinute2] = start2.split(':').map(Number);
+    const [endHour2, endMinute2] = end2.split(':').map(Number);
 
-  const start1Minutes = startHour1 * 60 + startMinute1;
-  const end1Minutes = endHour1 * 60 + endMinute1;
-  const start2Minutes = startHour2 * 60 + startMinute2;
-  const end2Minutes = endHour2 * 60 + endMinute2;
+    const start1Minutes = startHour1 * 60 + startMinute1;
+    const end1Minutes = endHour1 * 60 + endMinute1;
+    const start2Minutes = startHour2 * 60 + startMinute2;
+    const end2Minutes = endHour2 * 60 + endMinute2;
 
-  return start1Minutes < end2Minutes && start2Minutes < end1Minutes;
+    return start1Minutes < end2Minutes && start2Minutes < end1Minutes;
 };
 
 app.get('/api/booked', (req, res) => {
@@ -81,7 +81,9 @@ app.get('/api/booked', (req, res) => {
 // Reserve a room
 app.post('/api/reservations', (req, res) => {
 
-    const {id, date, startTime, endTime} = req.body;
+    const {id, date, startTime, endTime,roomName} = req.body;
+
+
 
     if (!id || !date || !startTime || !endTime) {
         return res.status(400).json({error: 'Room ID, date, and time are required'});
@@ -96,12 +98,15 @@ app.post('/api/reservations', (req, res) => {
     }
 
     // Ajouter la réservation avec l'ID de la salle
-    reservations.push({roomId: id, date, startTime, endTime});
+    reservations.push({roomId: id, roomName, date, startTime, endTime });
 
     saveJSON(bookedUrl, reservations);
     res.status(201).json({message: 'Reservation created successfully'});
 });
 
+app.get('/api/reservations', (req, res) => {
+    res.status(200).json(reservations); // Retourne toutes les réservations
+});
 
 // Start server
 app.listen(PORT, () => {

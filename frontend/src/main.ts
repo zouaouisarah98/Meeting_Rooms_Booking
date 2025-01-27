@@ -22,5 +22,6 @@ app.use(createPinia())
 app.use(axios)
 app.use(VXETable)
 app.use(ElementPlus)
+// app.use(VueScheduler)
 
 app.mount('#app')
