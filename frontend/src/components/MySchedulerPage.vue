@@ -1,62 +1,64 @@
-<!-- Calendar.vue -->
 <template>
   <div class="calendar-container">
+    <h2>Meeting Room Schedule</h2>
     <FullCalendar
-      :options="calendarOptions"
-      @dateClick="handleDateClick"
-      @eventClick="handleEventClick"
+        class='demo-app-calendar'
+        :options="calendarOptions"
     />
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed ,onMounted} from 'vue';
+
+import { computed, onMounted } from 'vue';
 import { BookingRoom } from '../store/roomStore.ts';
 import FullCalendar from '@fullcalendar/vue3';
 import dayGridPlugin from '@fullcalendar/daygrid';
 import timeGridPlugin from '@fullcalendar/timegrid';
 
-const store = BookingRoom();
-const reservations = computed(() => store.reservations);
+// Définition des types pour une réservation
+interface Reservation {
+  roomName: string;
+  date: string;
+  startTime: string;
+  endTime: string;
+}
 
+// Initialisation du store BookingRoom
+const store = BookingRoom();
+
+// récuperation des  réservations provenant du store
+const reservations = computed<Reservation[]>(() => store.reservations);
+
+
+// Personnalisation des options du calendrier
 const calendarOptions = computed(() => ({
   plugins: [dayGridPlugin, timeGridPlugin],
   initialView: 'timeGridWeek',
-  events: reservations.value.map(reservation => ({
-    title: `Room ${reservation.roomName}`, // Titre de la réservation
+  editable: true,
+  weekends: false,
+  events: reservations.value.map((reservation) => ({
+    title: `${reservation.roomName}`, // Titre de l'événement
     start: `${reservation.date}T${reservation.startTime}`, // Date et heure de début
     end: `${reservation.date}T${reservation.endTime}`, // Date et heure de fin
-    description: `Reserved by User`,
-    backgroundColor: 'red', // Colorier en rouge les événements réservés
+    backgroundColor: 'red', // Couleur personnalisée
     borderColor: 'red',
   })),
-  dateClick(info) {
-    console.log('Date clicked: ', info.dateStr);
-  },
-  eventClick(info) {
-    console.log('Event clicked: ', info.event.title);
-  }
 }));
 
 
-const handleDateClick = (info) => {
-  console.log('Date clicked: ', info.dateStr);
-};
 
-const handleEventClick = (info) => {
-  console.log('Event clicked: ', info.event.title);
-};
-
+// Chargement des réservations au montage du composant
 onMounted(async () => {
   await store.fetchReservations();
 });
-
 </script>
 
 <style scoped>
-.calendar-container {
-  width: 80%;
+.demo-app-calendar {
+  height: 53em;
   margin: 1em;
-  height: 10em;
+  flex-grow: 1;
+  padding: 1em;
 }
 </style>
